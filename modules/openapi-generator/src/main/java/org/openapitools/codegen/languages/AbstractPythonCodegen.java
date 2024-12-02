@@ -2159,6 +2159,10 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
             return result;
         }
 
+        private boolean isQuoted(String value) {
+            return value != null && value.length() >= 2 && value.startsWith("'") && value.endsWith("'");
+        }
+
         private String finalizeType(CodegenProperty cp, PythonType pt) {
             if (!cp.required || cp.isNullable) {
                 moduleImports.add("typing", "Optional");
@@ -2176,10 +2180,18 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
                 pt.annotate("alias", cp.baseName);
             }
 
-            /* TODO review as example may break the build
-            if (!StringUtils.isEmpty(cp.getExample())) { // has example
-                fields.add(String.format(Locale.ROOT, "example=%s", cp.getExample()));
-            }*/
+            if (!StringUtils.isEmpty(cp.example)) { // has example
+                if (cp.isString && isQuoted(cp.example)) { // for string, we replace ` with " for quoting
+                    String example = cp.example.substring(1, cp.example.length() - 1).replace("\"", "\\\"");
+                    pt.annotate(
+                            "examples",
+                            Collections.singletonList("\"" + example + "\"")
+                    );
+                }
+                else {
+                    pt.annotate("examples", Collections.singletonList(cp.example));
+                }
+            }
 
             //String defaultValue = null;
             if (!cp.required) { //optional
