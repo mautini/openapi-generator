@@ -2182,7 +2182,7 @@ public abstract class AbstractPythonCodegen extends DefaultCodegen implements Co
 
             if (!StringUtils.isEmpty(cp.example)) { // has example
                 if (cp.isString && isQuoted(cp.example)) { // for string, we replace ` with " for quoting
-                    String example = cp.example.substring(1, cp.example.length() - 1).replace("\"", "\\\"");
+                    String example = cp.example.substring(1, cp.example.length() - 1).replace("\"", "\\\""); // handle " in example
                     pt.annotate(
                             "examples",
                             Collections.singletonList("\"" + example + "\"")
